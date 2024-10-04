@@ -14,7 +14,7 @@ def create_items_table(conn):
                 url TEXT NOT NULL,
                 label TEXT,
                 previous_lowest_price_date DATE NOT NULL,
-                previous_lowest_price TEXT
+                previous_lowest_price REAL
             );
         ''')
     print("Table 'items' created successfully.")

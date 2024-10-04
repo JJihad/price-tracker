@@ -1,8 +1,12 @@
+import logging
 import requests as r
 import bs4
 import datetime
 from db.db_setup import create_database, create_items_table
 from models.item import Item
+
+# Set the logging level & the log message format
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Create DB connection
 connection = create_database()
@@ -47,12 +51,19 @@ def item_price_from_playstation_store(url: str) -> float:
         attrs={'data-qa': 'mfeCtaMain#offer1#finalPrice'})
         item_price = price_lines[0].text
 
-    return item_price.replace("$", "")
+    return float(item_price.replace("$", ""))
 
 def check_if_new_lowest_price(item: Item) -> bool:
     return item.previous_lowest_price > item_price_from_playstation_store(item.url)
 
 for item in all_tracked_items:
-    if check_if_new_lowest_price(item):
-        print(item.label)
+    logging.info('checking if there is a new lower price for item : ' + item.label)
+    if item.previous_lowest_price == 0:
+        item.previous_lowest_price = item_price_from_playstation_store(item.url)
+        # TODO : update item in db
+        print(item.label + ' is a new item in the list, actual price updated is : ' + str(item.previous_lowest_price))
+
+    elif check_if_new_lowest_price(item):
+        # TODO : update item in db
+        # TODO : send email alert
         print(item_price_from_playstation_store(item.url))
