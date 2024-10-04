@@ -1,1 +1,4 @@
 /.venv
+models/__pycache__/item.cpython-312.pyc
+db/price_tracker.db
+db/__pycache__/db_setup.cpython-312.pyc
