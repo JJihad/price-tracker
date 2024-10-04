@@ -1,6 +1,36 @@
 import requests as r
 import bs4
+import datetime
+from db.db_setup import create_database, create_items_table
 from models.item import Item
+
+# Create DB connection
+connection = create_database()
+
+# Create table if not exists
+create_items_table(connection)
+
+def select_all_items(conn):
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM items;") 
+    
+    # Fetch all rows from the executed query
+    rows = cursor.fetchall()
+    
+    # Convert rows to Item objects
+    items = [
+        Item(url=row[1], label=row[2], previous_lowest_price_date=datetime.date.fromisoformat(row[3]), previous_lowest_price=row[4])
+        for row in rows
+    ]
+
+    return items
+
+for item in select_all_items(connection):
+    print(item)
+
+
+# Close connection
+connection.close()
 
 def item_price_from_playstation_store(url: str) -> str:
 
@@ -19,5 +49,3 @@ def item_price_from_playstation_store(url: str) -> str:
         item_price = price_lines[0].text
 
     return item_price
-
-
