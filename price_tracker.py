@@ -25,14 +25,13 @@ def select_all_items(conn):
 
     return items
 
-for item in select_all_items(connection):
-    print(item)
+all_tracked_items = select_all_items(connection)
 
 
 # Close connection
 connection.close()
 
-def item_price_from_playstation_store(url: str) -> str:
+def item_price_from_playstation_store(url: str) -> float:
 
     response = r.get(url)
     soup = bs4.BeautifulSoup(response.text, features='html.parser')
@@ -48,4 +47,12 @@ def item_price_from_playstation_store(url: str) -> str:
         attrs={'data-qa': 'mfeCtaMain#offer1#finalPrice'})
         item_price = price_lines[0].text
 
-    return item_price
+    return item_price.replace("$", "")
+
+def check_if_new_lowest_price(item: Item) -> bool:
+    return item.previous_lowest_price > item_price_from_playstation_store(item.url)
+
+for item in all_tracked_items:
+    if check_if_new_lowest_price(item):
+        print(item.label)
+        print(item_price_from_playstation_store(item.url))
