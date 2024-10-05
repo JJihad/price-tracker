@@ -13,7 +13,9 @@ class Item:
                  url: str,
                  label: str = None,
                  previous_lowest_price_date: datetime.date = datetime.date.today(),
-                 previous_lowest_price: float = 0):
+                 previous_lowest_price: float = 0,
+                 id: int = None):
+        self.id = id  # Initialize id
         self.label = label
         self.url = url
         self.previous_lowest_price_date = previous_lowest_price_date
