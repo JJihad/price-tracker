@@ -5,12 +5,14 @@ import datetime
 from db.db_setup import create_database, create_items_table
 from models.item import Item
 from update_item_to_track import update_item
+from send_email import email_body, send_email
 
 # Set the logging level & the log message format
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Create DB connection
 connection = create_database()
+logging.info('Connection open')
 
 # Create table if not exists
 create_items_table(connection)
@@ -31,6 +33,7 @@ def select_all_items(conn):
     return items
 
 all_tracked_items = select_all_items(connection)
+logging.info('Items tracked : ' + str(all_tracked_items.__len__()))
 
 def item_price_from_playstation_store(url: str) -> float:
 
@@ -51,19 +54,19 @@ def item_price_from_playstation_store(url: str) -> float:
     return float(item_price.replace("$", ""))
 
 def check_if_new_lowest_price(item: Item) -> bool:
-    logging.info('checking if there is a new price for item : ' + item.label + ' lower than : ' + str(item.previous_lowest_price))
+    logging.info('checking if there is a new price for item : ' + item.label + ' lower than : ' + "$" + str(item.previous_lowest_price))
     return item.previous_lowest_price > item_price_from_playstation_store(item.url)
 
 for item in all_tracked_items:
-    if item.previous_lowest_price == 0:
-        item.previous_lowest_price = item_price_from_playstation_store(item.url)
+    if (item.previous_lowest_price == 0) or (check_if_new_lowest_price(item)):
+        actual_price = item_price_from_playstation_store(item.url)
+        body = email_body(item.url, item.previous_lowest_price, actual_price)
+        item.previous_lowest_price = actual_price
         update_item(connection, item.id, item.previous_lowest_price)
-        logging.info(item.label + ' is a new item in the list, actual price updated is : ' + str(item.previous_lowest_price))
-
-    elif check_if_new_lowest_price(item):
-        update_item(connection, item.id, item_price_from_playstation_store(item.url))
-        # TODO : send email alert
-        print(item_price_from_playstation_store(item.url))
+        send_email(
+            'Price drop alert for item : ' + item.label,
+            body,
+            'example@gmail.com')
 
 # Close connection
 connection.close()

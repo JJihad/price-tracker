@@ -3,3 +3,4 @@ models/__pycache__/item.cpython-312.pyc
 db/price_tracker.db
 db/__pycache__/db_setup.cpython-312.pyc
 __pycache__/update_item_to_track.cpython-312.pyc
+__pycache__/send_email.cpython-312.pyc
