@@ -41,14 +41,21 @@ def check_if_new_lowest_price(item: Item) -> bool:
     logging.info('checking if there is a new price for item : ' + item.label + ' lower than : ' + "$" + str(item.previous_lowest_price))
     return item.previous_lowest_price > item_price_from_playstation_store(item.url)
 
+list_of_sales = []
 for item in all_tracked_items:
     if (item.previous_lowest_price == 0) or (check_if_new_lowest_price(item)):
+        previous_price = item.previous_lowest_price
         actual_price = item_price_from_playstation_store(item.url)
-        body = email_body(item.url, item.previous_lowest_price, actual_price)
+
+        list_of_sales.append((item, previous_price, actual_price))
+
         item.previous_lowest_price = actual_price
         update_item(connection, item.id, item.previous_lowest_price)
-        send_email(
-            'Price drop alert for item : ' + item.label,
+
+if list_of_sales:
+    body = email_body(list_of_sales)  
+    send_email(
+            'Price drop alert for ' + str(len(list_of_sales)) + ' items',
             body,
             'example@gmail.com')
 

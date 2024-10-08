@@ -1,21 +1,29 @@
 import logging
 import smtplib
 from email.mime.text import MIMEText
+from typing import List, Tuple
+from models.item import Item
 
 # Set the logging level & the log message format
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def email_body(url: str, previous_price: float, actual_price: float) -> str:
-    return f"""Hi,
-     Price drop of item in {url}.
-     Previous price is : ${previous_price}.
-     Actual price is : ${actual_price}."""
+def email_body(data: List[Tuple[Item, float, float]]) -> str:
+    body = """Hi dear shopper,\n
+    This is a sales alert for the following items :\n"""
+    
+    for item, previous_price, actual_price in data:
+        body = body + f"""\n{item.label}
+                       Previous price: {previous_price}
+                       Actual price: {actual_price}
+                       URL: {item.url}\n"""
+        
+    return body + '\n' + 'See you next time'
 
 def send_email(subject, body, to_email):
     # Set up your email server and login details
     smtp_server = 'smtp.gmail.com'
     smtp_port = 587
-    from_email = 'jbr.jihad@gmail.com'
+    from_email = 'example@gmail.com'
     password = 'rpmm yojt ipyz irtw'
 
     # Create the email
