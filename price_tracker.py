@@ -1,10 +1,9 @@
 import logging
 import requests as r
 import bs4
-import datetime
 from db.db_setup import create_database, create_items_table
+from db.db_access import select_all_items, update_item
 from models.item import Item
-from update_item_to_track import update_item
 from send_email import email_body, send_email
 
 # Set the logging level & the log message format
@@ -16,21 +15,6 @@ logging.info('Connection open')
 
 # Create table if not exists
 create_items_table(connection)
-
-def select_all_items(conn):
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM items;") 
-    
-    # Fetch all rows from the executed query
-    rows = cursor.fetchall()
-    
-    # Convert rows to Item objects
-    items = [
-        Item(id=row[0], url=row[1], label=row[2], previous_lowest_price_date=datetime.date.fromisoformat(row[3]), previous_lowest_price=row[4])
-        for row in rows
-    ]
-
-    return items
 
 all_tracked_items = select_all_items(connection)
 logging.info('Items tracked : ' + str(all_tracked_items.__len__()))

@@ -2,7 +2,6 @@ import sqlite3
 
 # Create a connection to the SQLite database
 def create_database():
-    #conn = sqlite3.connect(r"..\..\dbs\price_tracker.db")  # Using raw string to handle backslashes
     conn = sqlite3.connect("db/price_tracker.db")
     return conn
 
