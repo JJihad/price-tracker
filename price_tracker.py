@@ -27,6 +27,9 @@ def item_price_from_playstation_store(url: str) -> float:
     price_lines = soup.find_all(
         class_='psw-t-title-m',
         attrs={'data-qa': 'mfeCtaMain#offer0#finalPrice'})
+    if not price_lines:
+        raise Exception('Price not found for article : ' + item.label)
+
     item_price = price_lines[0].text
 
     if item_price == 'Free':
